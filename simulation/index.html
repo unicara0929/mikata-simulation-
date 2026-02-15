@@ -27,6 +27,7 @@
             background: linear-gradient(135deg, #ff5757 0%, #ff8a80 100%);
             min-height: 100vh;
             padding: 20px;
+            padding-bottom: 80px;
         }
 
         .container {
@@ -254,18 +255,29 @@
             color: #ff5757;
         }
 
-        /* 計算ボタン（sticky） */
-        .calculate-btn-wrapper {
-            position: sticky;
-            bottom: 20px;
-            z-index: 100;
-            padding: 0;
-            margin-top: 10px;
+        /* 計算ボタン（画面下部に固定） */
+        .calculate-btn-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calculate-btn-fixed .calculate-btn {
+            max-width: 800px;
+            margin: 0 auto;
+            display: block;
         }
 
         .calculate-btn {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             background: linear-gradient(135deg, #ff5757 0%, #ff8a80 100%);
             color: white;
             border: none;
@@ -1204,11 +1216,6 @@
                     </div>
                 </div>
 
-                <div class="calculate-btn-wrapper">
-                    <button class="calculate-btn" onclick="calculate()">
-                        💡 シミュレーション実行
-                    </button>
-                </div>
             </div>
 
             <input type="hidden" id="numChildren" value="2">
@@ -4312,5 +4319,12 @@
             }
         }
     </script>
+
+    <!-- 固定シミュレーション実行ボタン -->
+    <div class="calculate-btn-fixed">
+        <button class="calculate-btn" onclick="calculate()">
+            💡 シミュレーション実行
+        </button>
+    </div>
 </body>
 </html>
