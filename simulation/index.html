@@ -2027,7 +2027,7 @@
                             💰 児童手当（2024年10月改正）
                         </p>
                         <ul style="font-size: 13px; color: #666; margin: 0; padding-left: 20px; line-height: 1.8;">
-                            <li>0〜2歳：月1.5万円、3歳〜高校：月1万円（第3子以降は1.5万円）</li>
+                            <li>0〜2歳：月1.5万円、3歳〜高校卒業：月1万円（第3子以降は月3万円）</li>
                             <li><strong>所得制限撤廃</strong>（全世帯対象）</li>
                         </ul>
                     </div>
@@ -3138,12 +3138,11 @@
                 let childAllowance = 0;
                 const addChildAllowance = (age, childNum) => {
                     if (age >= 0 && age < 3) {
-                        return 18; // 0-2歳：月1.5万円
-                    } else if (age >= 3 && age < 15) {
-                        // 第3子以降は1.5万円、それ以外は1万円
-                        return childNum >= 3 ? 18 : 12;
-                    } else if (age >= 15 && age < 18) {
-                        return 12; // 高校生（2024年12月〜）：月1万円
+                        // 0-2歳：第3子以降は月3万円、それ以外は月1.5万円
+                        return childNum >= 3 ? 36 : 18;
+                    } else if (age >= 3 && age < 18) {
+                        // 3歳〜高校卒業：第3子以降は月3万円、それ以外は月1万円
+                        return childNum >= 3 ? 36 : 12;
                     }
                     return 0;
                 };
@@ -3845,6 +3844,7 @@
                         <th>総支出</th>
                         <th>年間収支</th>
                         <th>貯蓄残高</th>
+                        <th>総資産</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3859,6 +3859,7 @@
                         <td>${formatMoney(d.totalExpense)}</td>
                         <td style="color: ${d.annualCashflow >= 0 ? '#28a745' : '#dc3545'}">${formatMoney(d.annualCashflow)}</td>
                         <td style="color: ${d.savings >= 0 ? '#28a745' : '#dc3545'}; font-weight: 600">${formatMoney(d.savings)}</td>
+                        <td style="color: ${d.totalAssets >= 0 ? '#28a745' : '#dc3545'}; font-weight: 600">${formatMoney(d.totalAssets)}</td>
                     </tr>
                 `;
             });
@@ -3883,14 +3884,15 @@
         function downloadCSV() {
             const headers = ['年', '本人年齢', '配偶者年齢', '子1年齢', '子2年齢', '子3年齢',
                            '本人収入', '配偶者収入', '総収入', '生活費', '住居費', '教育費',
-                           '総支出', '年間収支', '貯蓄残高'];
+                           '総支出', '年間収支', '貯蓄残高', '総資産'];
             
             const rows = cashflowData.map((d, i) => [
                 i + 1, d.age1, d.age2 > 0 ? d.age2 : '', 
                 d.ageChild1, d.ageChild2, d.ageChild3,
                 Math.round(d.income1), Math.round(d.income2), Math.round(d.totalIncome),
                 Math.round(d.livingCost), Math.round(d.housingCost), Math.round(d.educationCost),
-                Math.round(d.totalExpense), Math.round(d.annualCashflow), Math.round(d.savings)
+                Math.round(d.totalExpense), Math.round(d.annualCashflow), Math.round(d.savings),
+                Math.round(d.totalAssets)
             ]);
 
             const csv = Papa.unparse({ fields: headers, data: rows });
