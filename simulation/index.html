@@ -630,15 +630,17 @@
 
         table {
             width: 100%;
+            min-width: 1200px;
             border-collapse: collapse;
             background: white;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         th, td {
-            padding: 12px 10px;
+            padding: 8px 6px;
             text-align: right;
             border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
         }
 
         th {
@@ -3593,13 +3595,30 @@
                     ageChild1: ageChild1,
                     ageChild2: ageChild2,
                     ageChild3: ageChild3,
+                    // 収入内訳
                     income1: income1,
                     income2: income2,
+                    retirement: retirement,
+                    childAllowance: childAllowance,
+                    deduction: deduction,
+                    longTermBonus: longTermBonus,
                     totalIncome: totalIncomeYear,
+                    // 支出内訳
                     livingCost: livingCost,
                     housingCost: housingCost,
+                    carCost: carCostInflated,
+                    communication: communicationInflated,
+                    allowance: allowanceInflated,
                     educationCost: educationCost,
+                    lifeInsurance: lifeInsurance,
+                    propertyInsurance: propertyInsurance,
+                    otherLoan: otherLoanYear,
+                    careCost: careCostYear,
+                    investmentContribution: investmentContribution,
+                    fireInsurance: fireInsuranceCost,
+                    temporaryExpense: temporaryExpense,
                     totalExpense: totalExpenseYear + investmentContribution + fireInsuranceCost + temporaryExpense,
+                    // 収支・資産
                     annualCashflow: annualCashflow,
                     savings: savings,
                     investment: investment,
@@ -3973,27 +3992,29 @@
             if (charts.income) charts.income.destroy();
             const incomeCtx = document.getElementById('incomeChart').getContext('2d');
             charts.income = new Chart(incomeCtx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: cashflowData.map((d, i) => i + 1 + '年'),
                     datasets: [{
                         label: '本人収入',
                         data: cashflowData.map(d => d.income1),
-                        borderColor: '#ff5757',
-                        backgroundColor: 'rgba(255, 87, 87, 0.15)',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        tension: 0.4
+                        backgroundColor: '#ff5757'
                     }, {
                         label: '配偶者収入',
                         data: cashflowData.map(d => d.income2),
-                        borderColor: '#2c5f8a',
-                        backgroundColor: 'rgba(255, 138, 128, 0.15)',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        tension: 0.4
+                        backgroundColor: '#2c5f8a'
+                    }, {
+                        label: '退職金',
+                        data: cashflowData.map(d => d.retirement),
+                        backgroundColor: '#e67e22'
+                    }, {
+                        label: '児童手当',
+                        data: cashflowData.map(d => d.childAllowance),
+                        backgroundColor: '#27ae60'
+                    }, {
+                        label: 'ローン控除・優遇',
+                        data: cashflowData.map(d => d.deduction + d.longTermBonus),
+                        backgroundColor: '#8e44ad'
                     }]
                 },
                 options: {
@@ -4001,16 +4022,27 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { font: { size: 13, weight: '600' }, padding: 12 }
+                            labels: { font: { size: 12, weight: '600' }, padding: 10 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed.y;
+                                    if (val === 0) return null;
+                                    return context.dataset.label + ': ' + Math.round(val).toLocaleString() + '万円';
+                                }
+                            }
                         }
                     },
-                    scales: { 
-                        x: { 
+                    scales: {
+                        x: {
+                            stacked: true,
                             ticks: { maxTicksLimit: 20, font: { size: 11 } },
                             grid: { color: 'rgba(0, 0, 0, 0.05)' }
                         },
                         y: {
-                            ticks: { 
+                            stacked: true,
+                            ticks: {
                                 font: { size: 11 },
                                 callback: function(value) {
                                     return value.toLocaleString() + '万';
@@ -4041,6 +4073,26 @@
                         label: '教育費',
                         data: cashflowData.map(d => d.educationCost),
                         backgroundColor: '#ffc107'
+                    }, {
+                        label: '車・通信・小遣い',
+                        data: cashflowData.map(d => d.carCost + d.communication + d.allowance),
+                        backgroundColor: '#8e44ad'
+                    }, {
+                        label: '保険・介護',
+                        data: cashflowData.map(d => d.lifeInsurance + d.propertyInsurance + d.careCost),
+                        backgroundColor: '#27ae60'
+                    }, {
+                        label: 'その他ローン',
+                        data: cashflowData.map(d => d.otherLoan),
+                        backgroundColor: '#e67e22'
+                    }, {
+                        label: '積立投資',
+                        data: cashflowData.map(d => d.investmentContribution),
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: '火災保険・臨時支出',
+                        data: cashflowData.map(d => d.fireInsurance + d.temporaryExpense),
+                        backgroundColor: '#95a5a6'
                     }]
                 },
                 options: {
@@ -4048,18 +4100,32 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { font: { size: 13, weight: '600' }, padding: 12 }
+                            labels: { font: { size: 12, weight: '600' }, padding: 10 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed.y;
+                                    if (val === 0) return null;
+                                    return context.dataset.label + ': ' + Math.round(val).toLocaleString() + '万円';
+                                }
+                            }
                         }
                     },
                     scales: {
-                        x: { 
-                            stacked: true, 
+                        x: {
+                            stacked: true,
                             ticks: { maxTicksLimit: 20, font: { size: 11 } },
                             grid: { color: 'rgba(0, 0, 0, 0.05)' }
                         },
-                        y: { 
+                        y: {
                             stacked: true,
-                            ticks: { font: { size: 11 } },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return value.toLocaleString() + '万';
+                                }
+                            },
                             grid: { color: 'rgba(0, 0, 0, 0.08)' }
                         }
                     }
@@ -4157,28 +4223,53 @@
             let html = `
                 <thead>
                     <tr>
-                        <th class="year-column">年</th>
-                        <th>本人年齢</th>
-                        <th>配偶者年齢</th>
-                        <th>総収入</th>
-                        <th>総支出</th>
-                        <th>年間収支</th>
-                        <th>貯蓄残高</th>
-                        <th>投資評価額</th>
-                        <th>総資産<br><span style="font-size:10px;font-weight:400;">（貯蓄+投資）</span></th>
+                        <th class="year-column" rowspan="2">年</th>
+                        <th rowspan="2">本人<br>年齢</th>
+                        <th rowspan="2">配偶者<br>年齢</th>
+                        <th colspan="4" style="background: rgba(255,87,87,0.1); border-bottom: 2px solid #ff5757;">収入内訳</th>
+                        <th rowspan="2" style="background: rgba(255,87,87,0.15);">総収入</th>
+                        <th colspan="5" style="background: rgba(44,95,138,0.1); border-bottom: 2px solid #2c5f8a;">支出内訳</th>
+                        <th rowspan="2" style="background: rgba(44,95,138,0.15);">総支出</th>
+                        <th rowspan="2">年間<br>収支</th>
+                        <th rowspan="2">貯蓄<br>残高</th>
+                        <th rowspan="2">投資<br>評価額</th>
+                        <th rowspan="2">総資産</th>
+                    </tr>
+                    <tr>
+                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">本人</th>
+                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">配偶者</th>
+                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">退職金<br>手当等</th>
+                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">児童<br>手当</th>
+                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">生活費</th>
+                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">住居費</th>
+                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">教育費</th>
+                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">保険<br>車等</th>
+                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">積立<br>投資等</th>
                     </tr>
                 </thead>
                 <tbody>
             `;
             cashflowData.forEach((d, i) => {
+                const otherIncome = d.retirement + d.deduction + d.longTermBonus;
+                const insuranceCarEtc = d.carCost + d.communication + d.allowance + d.lifeInsurance + d.propertyInsurance + d.otherLoan + d.careCost;
+                const investEtc = d.investmentContribution + d.fireInsurance + d.temporaryExpense;
                 html += `
                     <tr>
                         <td class="year-column">${i + 1}年目</td>
                         <td>${d.age1}歳</td>
                         <td>${d.age2 > 0 ? d.age2 + '歳' : '-'}</td>
-                        <td>${formatMoney(d.totalIncome)}</td>
-                        <td>${formatMoney(d.totalExpense)}</td>
-                        <td style="color: ${d.annualCashflow >= 0 ? '#28a745' : '#dc3545'}">${formatMoney(d.annualCashflow)}</td>
+                        <td style="color:#c0392b;">${formatMoney(d.income1)}</td>
+                        <td style="color:#c0392b;">${formatMoney(d.income2)}</td>
+                        <td style="color:#c0392b;">${otherIncome > 0 ? formatMoney(otherIncome) : '-'}</td>
+                        <td style="color:#c0392b;">${d.childAllowance > 0 ? formatMoney(d.childAllowance) : '-'}</td>
+                        <td style="color:#c0392b; font-weight:600; background:rgba(255,87,87,0.05);">${formatMoney(d.totalIncome)}</td>
+                        <td style="color:#2c5f8a;">${formatMoney(d.livingCost)}</td>
+                        <td style="color:#2c5f8a;">${formatMoney(d.housingCost)}</td>
+                        <td style="color:#2c5f8a;">${d.educationCost > 0 ? formatMoney(d.educationCost) : '-'}</td>
+                        <td style="color:#2c5f8a;">${insuranceCarEtc > 0 ? formatMoney(insuranceCarEtc) : '-'}</td>
+                        <td style="color:#2c5f8a;">${investEtc > 0 ? formatMoney(investEtc) : '-'}</td>
+                        <td style="color:#2c5f8a; font-weight:600; background:rgba(44,95,138,0.05);">${formatMoney(d.totalExpense)}</td>
+                        <td style="color: ${d.annualCashflow >= 0 ? '#28a745' : '#dc3545'}; font-weight:600;">${formatMoney(d.annualCashflow)}</td>
                         <td style="color: ${d.savings >= 0 ? '#28a745' : '#dc3545'}; font-weight: 600">${formatMoney(d.savings)}</td>
                         <td style="color: #1976d2; font-weight: 600">${formatMoney(d.investment)}</td>
                         <td style="color: ${d.totalAssets >= 0 ? '#28a745' : '#dc3545'}; font-weight: 700">${formatMoney(d.totalAssets)}</td>
@@ -4205,15 +4296,25 @@
 
         function downloadCSV() {
             const headers = ['年', '本人年齢', '配偶者年齢', '子1年齢', '子2年齢', '子3年齢',
-                           '本人収入', '配偶者収入', '総収入', '生活費', '住居費', '教育費',
-                           '総支出', '年間収支', '貯蓄残高', '投資評価額', '総資産'];
+                           '本人収入', '配偶者収入', '退職金', '児童手当', 'ローン控除', '長期優良優遇', '総収入',
+                           '生活費', '住居費', '車関連費', '通信費', 'お小遣い', '教育費',
+                           '生命保険', '損害保険', 'その他ローン', '介護費',
+                           '積立投資', '火災保険', '臨時支出', '総支出',
+                           '年間収支', '貯蓄残高', '投資評価額', '総資産'];
 
             const rows = cashflowData.map((d, i) => [
                 i + 1, d.age1, d.age2 > 0 ? d.age2 : '',
                 d.ageChild1, d.ageChild2, d.ageChild3,
-                Math.round(d.income1), Math.round(d.income2), Math.round(d.totalIncome),
-                Math.round(d.livingCost), Math.round(d.housingCost), Math.round(d.educationCost),
-                Math.round(d.totalExpense), Math.round(d.annualCashflow), Math.round(d.savings),
+                Math.round(d.income1), Math.round(d.income2), Math.round(d.retirement),
+                Math.round(d.childAllowance), Math.round(d.deduction), Math.round(d.longTermBonus),
+                Math.round(d.totalIncome),
+                Math.round(d.livingCost), Math.round(d.housingCost), Math.round(d.carCost),
+                Math.round(d.communication), Math.round(d.allowance), Math.round(d.educationCost),
+                Math.round(d.lifeInsurance), Math.round(d.propertyInsurance), Math.round(d.otherLoan),
+                Math.round(d.careCost),
+                Math.round(d.investmentContribution), Math.round(d.fireInsurance), Math.round(d.temporaryExpense),
+                Math.round(d.totalExpense),
+                Math.round(d.annualCashflow), Math.round(d.savings),
                 Math.round(d.investment), Math.round(d.totalAssets)
             ]);
 
