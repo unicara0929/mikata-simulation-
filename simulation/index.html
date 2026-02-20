@@ -1362,7 +1362,56 @@
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- その他収入（複数パターン対応） -->
+                    <div style="margin-top: 20px; border-top: 2px solid #e0e0e0; padding-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div class="input-label" style="margin-bottom: 0;">その他収入</div>
+                            <button type="button" onclick="addOtherIncome()" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">＋ 追加</button>
+                        </div>
+                        <div id="otherIncomeContainer">
+                            <div class="other-income-item" data-income-index="0" style="margin-bottom: 12px; padding: 12px; background: #f5f7fa; border-radius: 8px; border-left: 3px solid #27ae60;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-weight: 600; font-size: 14px; color: #1a3a5c;">パターン1</span>
+                                </div>
+                                <div class="input-row" style="margin-bottom: 6px;">
+                                    <div class="input-group">
+                                        <div class="input-label">名称</div>
+                                        <div class="input-wrapper">
+                                            <input type="text" class="otherIncomeName" value="副業" placeholder="名称" style="width: 100px;">
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <div class="input-label">年額</div>
+                                        <div class="input-wrapper">
+                                            <input type="number" class="otherIncomeAmount" value="0" step="10" min="0">
+                                            <span class="unit-label">万円</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-row">
+                                    <div class="input-group">
+                                        <div class="input-label">開始</div>
+                                        <div class="input-wrapper">
+                                            <input type="number" class="otherIncomeStart" value="0" min="0" max="60">
+                                            <span class="unit-label">年後</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <div class="input-label">終了</div>
+                                        <div class="input-wrapper">
+                                            <input type="number" class="otherIncomeEnd" value="30" min="0" max="60">
+                                            <span class="unit-label">年後</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="font-size: 12px; color: #999; margin-top: 8px;">
+                            💡 副業・不動産収入・親からの援助・相続など、追加の収入源を設定できます
+                        </p>
+                    </div>
+
                     </div><!-- accordion-body-inner -->
                     </div><!-- accordion-body -->
                 </div>
@@ -2986,6 +3035,80 @@
             if (item) item.remove();
         }
 
+        // その他収入パターン管理
+        let otherIncomeCount = 1;
+        function addOtherIncome() {
+            const container = document.getElementById('otherIncomeContainer');
+            const index = otherIncomeCount;
+            otherIncomeCount++;
+            const div = document.createElement('div');
+            div.className = 'other-income-item';
+            div.dataset.incomeIndex = index;
+            div.style.cssText = 'margin-bottom: 12px; padding: 12px; background: #f5f7fa; border-radius: 8px; border-left: 3px solid #27ae60;';
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: 600; font-size: 14px; color: #1a3a5c;">パターン${index + 1}</span>
+                    <button type="button" onclick="removeOtherIncome(this)" style="background: #ff5757; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">✕ 削除</button>
+                </div>
+                <div class="input-row" style="margin-bottom: 6px;">
+                    <div class="input-group">
+                        <div class="input-label">名称</div>
+                        <div class="input-wrapper">
+                            <input type="text" class="otherIncomeName" value="" placeholder="名称" style="width: 100px;">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-label">年額</div>
+                        <div class="input-wrapper">
+                            <input type="number" class="otherIncomeAmount" value="0" step="10" min="0">
+                            <span class="unit-label">万円</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <div class="input-label">開始</div>
+                        <div class="input-wrapper">
+                            <input type="number" class="otherIncomeStart" value="0" min="0" max="60">
+                            <span class="unit-label">年後</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-label">終了</div>
+                        <div class="input-wrapper">
+                            <input type="number" class="otherIncomeEnd" value="30" min="0" max="60">
+                            <span class="unit-label">年後</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeOtherIncome(btn) {
+            const item = btn.closest('.other-income-item');
+            if (item) item.remove();
+        }
+
+        // その他収入の年額合計を取得
+        function getOtherIncomeForYear(year) {
+            const items = document.querySelectorAll('.other-income-item');
+            let total = 0;
+            items.forEach(item => {
+                const amountEl = item.querySelector('.otherIncomeAmount');
+                const startEl = item.querySelector('.otherIncomeStart');
+                const endEl = item.querySelector('.otherIncomeEnd');
+                if (!amountEl) return;
+                const amount = parseFloat(amountEl.value) || 0;
+                const start = parseInt(startEl?.value) || 0;
+                const end = parseInt(endEl?.value) || 60;
+                if (amount > 0 && year >= start && year < end) {
+                    total += amount;
+                }
+            });
+            return total;
+        }
+
         // 就労パターンからその年の収入を計算（手取り変換あり）
         function getPerson2IncomeForYear(year, person2Growth, person2Retire, age2, person2Pension) {
             if (age2 >= person2Retire) return person2Pension;
@@ -3456,7 +3579,10 @@
                     longTermBonus = longTermTaxSaving;
                 }
 
-                const totalIncomeYear = income1 + income2 + retirement + childAllowance + deduction + longTermBonus;
+                // その他収入
+                const otherIncomeYear = getOtherIncomeForYear(year);
+
+                const totalIncomeYear = income1 + income2 + retirement + childAllowance + deduction + longTermBonus + otherIncomeYear;
 
                 // 支出計算（物価上昇率を適用）
                 const livingCost = basicLiving * Math.pow(1 + inflationRate, year);
@@ -3602,6 +3728,7 @@
                     childAllowance: childAllowance,
                     deduction: deduction,
                     longTermBonus: longTermBonus,
+                    otherIncome: otherIncomeYear,
                     totalIncome: totalIncomeYear,
                     // 支出内訳
                     livingCost: livingCost,
@@ -4042,6 +4169,10 @@
                         label: 'ローン控除・優遇',
                         data: cashflowData.map(d => d.deduction + d.longTermBonus),
                         backgroundColor: '#8e44ad'
+                    }, {
+                        label: 'その他収入',
+                        data: cashflowData.map(d => d.otherIncome),
+                        backgroundColor: '#2ecc71'
                     }]
                 },
                 options: {
@@ -4277,7 +4408,7 @@
                 <tbody>
             `;
             cashflowData.forEach((d, i) => {
-                const otherIncome = d.retirement + d.deduction + d.longTermBonus;
+                const otherIncome = d.retirement + d.deduction + d.longTermBonus + d.otherIncome;
                 const insuranceCarEtc = d.carCost + d.communication + d.allowance + d.lifeInsurance + d.propertyInsurance + d.otherLoan + d.careCost;
                 const investEtc = d.investmentContribution + d.fireInsurance + d.temporaryExpense;
                 html += `
@@ -4323,7 +4454,7 @@
 
         function downloadCSV() {
             const headers = ['年', '本人年齢', '配偶者年齢', '子1年齢', '子2年齢', '子3年齢',
-                           '本人収入', '配偶者収入', '退職金', '児童手当', 'ローン控除', '長期優良優遇', '総収入',
+                           '本人収入', '配偶者収入', '退職金', '児童手当', 'ローン控除', '長期優良優遇', 'その他収入', '総収入',
                            '生活費', '住居費', '車関連費', '通信費', 'お小遣い', '教育費',
                            '生命保険', '損害保険', 'その他ローン', '介護費',
                            '積立投資', '火災保険', '臨時支出', '総支出',
@@ -4334,7 +4465,7 @@
                 d.ageChild1, d.ageChild2, d.ageChild3,
                 Math.round(d.income1), Math.round(d.income2), Math.round(d.retirement),
                 Math.round(d.childAllowance), Math.round(d.deduction), Math.round(d.longTermBonus),
-                Math.round(d.totalIncome),
+                Math.round(d.otherIncome), Math.round(d.totalIncome),
                 Math.round(d.livingCost), Math.round(d.housingCost), Math.round(d.carCost),
                 Math.round(d.communication), Math.round(d.allowance), Math.round(d.educationCost),
                 Math.round(d.lifeInsurance), Math.round(d.propertyInsurance), Math.round(d.otherLoan),
