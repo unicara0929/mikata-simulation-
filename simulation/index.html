@@ -1252,14 +1252,14 @@
                         <div class="input-group">
                             <div class="input-label">本人の年収（額面）</div>
                             <div class="input-wrapper">
-                                <input type="number" id="person1Income" value="500" step="10">
+                                <input type="number" id="person1Income" value="500" step="10" oninput="syncTotalIncome()">
                                 <span class="unit-label">万円</span>
                             </div>
                         </div>
                         <div class="input-group">
                             <div class="input-label">配偶者の年収（額面）</div>
                             <div class="input-wrapper">
-                                <input type="number" id="person2Income" value="300" step="10">
+                                <input type="number" id="person2Income" value="300" step="10" oninput="syncTotalIncome()">
                                 <span class="unit-label">万円</span>
                             </div>
                         </div>
@@ -1295,6 +1295,41 @@
                                 <span class="unit-label">歳</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <div class="input-label">
+                                配偶者の就労形態
+                                <span class="help-icon" data-tip="パートや専業主婦など収入を得る期間を調整">?</span>
+                            </div>
+                            <div class="input-wrapper">
+                                <select id="person2WorkType" onchange="togglePerson2WorkSettings()">
+                                    <option value="fulltime" selected>フルタイム（定年まで）</option>
+                                    <option value="parttime">パート・時短勤務</option>
+                                    <option value="homemaker">専業主婦（主夫）</option>
+                                    <option value="custom">期間を指定</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group" id="person2WorkPeriodGroup" style="display: none;">
+                            <div class="input-label">就労期間</div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="number" id="person2WorkStart" value="0" min="0" max="40" style="width: 80px; padding: 10px;">
+                                <span style="font-size: 13px;">年後から</span>
+                                <input type="number" id="person2WorkEnd" value="30" min="0" max="50" style="width: 80px; padding: 10px;">
+                                <span style="font-size: 13px;">年後まで</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-row" id="person2PartIncomeRow" style="display: none;">
+                        <div class="input-group">
+                            <div class="input-label">パート収入（年間・額面）</div>
+                            <div class="input-wrapper">
+                                <input type="number" id="person2PartIncome" value="120" step="10">
+                                <span class="unit-label">万円</span>
+                            </div>
+                        </div>
+                        <div class="input-group"></div>
                     </div>
                     <div class="input-row">
                         <div class="input-group">
@@ -1561,14 +1596,14 @@
                             <div class="input-group">
                                 <div class="input-label">固定金利（年利）</div>
                                 <div class="input-wrapper">
-                                    <input type="number" id="fixedRate" value="1.5" step="0.1">
+                                    <input type="number" id="fixedRate" value="2.0" step="0.1">
                                     <span class="unit-label">%</span>
                                 </div>
                             </div>
                             <div class="input-group">
                                 <div class="input-label">変動金利（初期年利）</div>
                                 <div class="input-wrapper">
-                                    <input type="number" id="variableRate" value="0.5" step="0.1">
+                                    <input type="number" id="variableRate" value="1.0" step="0.1">
                                     <span class="unit-label">%</span>
                                 </div>
                             </div>
@@ -1813,13 +1848,30 @@
                                 <span class="unit-label">万円</span>
                             </div>
                         </div>
-                        <div class="input-group">
-                            <div class="input-label">その他ローン（月額）</div>
-                            <div class="input-wrapper">
-                                <input type="number" id="otherLoan" value="0" step="1">
-                                <span class="unit-label">万円</span>
+                        <div class="input-group"></div>
+                    </div>
+
+                    <!-- その他ローン（複数対応） -->
+                    <div style="margin-top: 20px; border-top: 2px solid #e0e0e0; padding-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div class="input-label" style="margin-bottom: 0;">その他ローン</div>
+                            <button type="button" onclick="addOtherLoan()" style="padding: 6px 16px; background: #ff5757; color: white; border: none; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">＋ 追加</button>
+                        </div>
+                        <div id="otherLoansContainer">
+                            <div class="other-loan-item" data-loan-index="0" style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #e0e0e0;">
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <input type="text" class="otherLoanName" value="車ローン" placeholder="名称" style="width: 100px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    <input type="number" class="otherLoanAmount" value="0" step="0.5" min="0" style="width: 80px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    <span style="font-size: 13px; color: #666;">万円/月</span>
+                                    <span style="font-size: 13px; color: #666; margin-left: 8px;">残り</span>
+                                    <input type="number" class="otherLoanYears" value="0" step="1" min="0" max="50" style="width: 60px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    <span style="font-size: 13px; color: #666;">年</span>
+                                </div>
                             </div>
                         </div>
+                        <p style="font-size: 12px; color: #999; margin-top: 8px;">
+                            💡 ローン期間を0にすると、シミュレーション全期間で支払いが続きます
+                        </p>
                     </div>
                     </div><!-- accordion-body-inner -->
                     </div><!-- accordion-body -->
@@ -1884,9 +1936,9 @@
                                 <div class="input-label">大学</div>
                                 <div class="input-wrapper">
                                     <select id="child1University">
-                                        <option value="60">国公立（年60万円）</option>
-                                        <option value="120" selected>私立文系（年120万円）</option>
-                                        <option value="180">私立理系（年180万円）</option>
+                                        <option value="54">国公立（年54万円）</option>
+                                        <option value="93" selected>私立文系（年93万円）</option>
+                                        <option value="124">私立理系（年124万円）</option>
                                     </select>
                                 </div>
                             </div>
@@ -1942,9 +1994,9 @@
                                 <div class="input-label">大学</div>
                                 <div class="input-wrapper">
                                     <select id="child2University">
-                                        <option value="60">国公立（年60万円）</option>
-                                        <option value="120" selected>私立文系（年120万円）</option>
-                                        <option value="180">私立理系（年180万円）</option>
+                                        <option value="54">国公立（年54万円）</option>
+                                        <option value="93" selected>私立文系（年93万円）</option>
+                                        <option value="124">私立理系（年124万円）</option>
                                     </select>
                                 </div>
                             </div>
@@ -2000,9 +2052,9 @@
                                 <div class="input-label">大学</div>
                                 <div class="input-wrapper">
                                     <select id="child3University">
-                                        <option value="60">国公立（年60万円）</option>
-                                        <option value="120" selected>私立文系（年120万円）</option>
-                                        <option value="180">私立理系（年180万円）</option>
+                                        <option value="54">国公立（年54万円）</option>
+                                        <option value="93" selected>私立文系（年93万円）</option>
+                                        <option value="124">私立理系（年124万円）</option>
                                     </select>
                                 </div>
                             </div>
@@ -2645,6 +2697,17 @@
             }
         }
 
+        // 収入詳細 → 世帯年収スライダーに連動
+        function syncTotalIncome() {
+            const p1 = parseFloat(document.getElementById('person1Income').value) || 0;
+            const p2 = parseFloat(document.getElementById('person2Income').value) || 0;
+            const total = p1 + p2;
+            const slider = document.getElementById('totalIncome');
+            const clamped = Math.min(Math.max(total, parseInt(slider.min)), parseInt(slider.max));
+            slider.value = clamped;
+            document.getElementById('totalIncomeValue').textContent = clamped + '万円';
+        }
+
         // 物件価格の自動計算
         function updateTotalPrice() {
             const land = parseFloat(document.getElementById('landPrice').value) || 0;
@@ -2739,6 +2802,59 @@
             const body = header.nextElementSibling;
             header.classList.toggle('open');
             body.classList.toggle('open');
+        }
+
+        // その他ローンの追加
+        let otherLoanCount = 1;
+        function addOtherLoan() {
+            const container = document.getElementById('otherLoansContainer');
+            const idx = otherLoanCount++;
+            const div = document.createElement('div');
+            div.className = 'other-loan-item';
+            div.setAttribute('data-loan-index', idx);
+            div.style.cssText = 'background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #e0e0e0;';
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <input type="text" class="otherLoanName" value="" placeholder="名称" style="width: 100px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <input type="number" class="otherLoanAmount" value="0" step="0.5" min="0" style="width: 80px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <span style="font-size: 13px; color: #666;">万円/月</span>
+                    <span style="font-size: 13px; color: #666; margin-left: 8px;">残り</span>
+                    <input type="number" class="otherLoanYears" value="0" step="1" min="0" max="50" style="width: 60px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <span style="font-size: 13px; color: #666;">年</span>
+                    <button type="button" onclick="removeOtherLoan(this)" style="margin-left: auto; padding: 4px 12px; background: #dc3545; color: white; border: none; border-radius: 15px; font-size: 12px; cursor: pointer;">✕</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeOtherLoan(btn) {
+            btn.closest('.other-loan-item').remove();
+        }
+
+        // その他ローンの合計を年ごとに取得
+        function getOtherLoansForYear(year) {
+            const items = document.querySelectorAll('.other-loan-item');
+            let total = 0;
+            items.forEach(item => {
+                const amount = parseFloat(item.querySelector('.otherLoanAmount').value) || 0;
+                const years = parseInt(item.querySelector('.otherLoanYears').value) || 0;
+                if (amount > 0) {
+                    if (years === 0 || year < years) {
+                        total += amount * 12;
+                    }
+                }
+            });
+            return total;
+        }
+
+        // 配偶者の就労形態切り替え
+        function togglePerson2WorkSettings() {
+            const workType = document.getElementById('person2WorkType').value;
+            const periodGroup = document.getElementById('person2WorkPeriodGroup');
+            const partIncomeRow = document.getElementById('person2PartIncomeRow');
+
+            periodGroup.style.display = (workType === 'custom') ? 'block' : 'none';
+            partIncomeRow.style.display = (workType === 'parttime') ? 'flex' : 'none';
         }
 
         // 比較モードトグル
@@ -2858,6 +2974,13 @@
             const person1Retirement = parseFloat(document.getElementById('person1Retirement').value);
             const person2Retirement = parseFloat(document.getElementById('person2Retirement').value);
 
+            // 配偶者の就労形態
+            const person2WorkType = document.getElementById('person2WorkType').value;
+            const person2WorkStart = parseInt(document.getElementById('person2WorkStart').value) || 0;
+            const person2WorkEnd = parseInt(document.getElementById('person2WorkEnd').value) || 30;
+            const person2PartIncomeGross = parseFloat(document.getElementById('person2PartIncome').value) || 120;
+            const person2PartIncome = calculateTakeHome(person2PartIncomeGross);
+
             // 子どもの個別有効/無効チェック
             const child1Enabled = document.getElementById('child1Enabled')?.checked ?? false;
             const child2Enabled = document.getElementById('child2Enabled')?.checked ?? false;
@@ -2882,7 +3005,7 @@
             const carCost = parseFloat(document.getElementById('carCost').value);
             const communication = parseFloat(document.getElementById('communication').value) * 12;
             const allowance = parseFloat(document.getElementById('allowance').value) * 12;
-            const otherLoan = parseFloat(document.getElementById('otherLoan').value) * 12;
+            // otherLoanは年ごとに動的計算するため、ここでは取得しない
 
             // 子ども別の教育費設定
             const child1Elementary = parseFloat(document.getElementById('child1Elementary').value);
@@ -3074,58 +3197,80 @@
 
                 let income2 = 0;
                 if (person2Age > 0) {
-                    if (age2 < person2Retire) {
-                        const baseIncome = person2Income * Math.pow(1 + person2Growth, year);
-                        
-                        // 子ども3人分の産休育休をチェック
-                        let isOnMaternity = false;
-                        let maternityIncome = 0;
-                        let isReturning = false;
-                        let returningRate = 1.0;
-                        
-                        // 子ども1（child1Enabledがtrueの場合）
-                        if (child1Enabled && child1Age !== 0) {
-                            if (year >= child1MaternityStart && year < child1MaternityStart + child1MaternityDuration) {
-                                isOnMaternity = true;
-                                maternityIncome = child1MaternityAllowance;
-                            } else if (year >= child1MaternityStart + child1MaternityDuration && year < child1MaternityStart + child1MaternityDuration + 3) {
-                                isReturning = true;
-                                returningRate = Math.min(returningRate, child1ReturnWorkRate);
-                            }
-                        }
-                        
-                        // 子ども2
-                        if (child2Enabled && child2Age !== 0) {
-                            if (year >= child2MaternityStart && year < child2MaternityStart + child2MaternityDuration) {
-                                isOnMaternity = true;
-                                maternityIncome = child2MaternityAllowance;
-                            } else if (year >= child2MaternityStart + child2MaternityDuration && year < child2MaternityStart + child2MaternityDuration + 3) {
-                                isReturning = true;
-                                returningRate = Math.min(returningRate, child2ReturnWorkRate);
-                            }
-                        }
-                        
-                        // 子ども3
-                        if (child3Enabled && child3Age !== 0) {
-                            if (year >= child3MaternityStart && year < child3MaternityStart + child3MaternityDuration) {
-                                isOnMaternity = true;
-                                maternityIncome = child3MaternityAllowance;
-                            } else if (year >= child3MaternityStart + child3MaternityDuration && year < child3MaternityStart + child3MaternityDuration + 3) {
-                                isReturning = true;
-                                returningRate = Math.min(returningRate, child3ReturnWorkRate);
-                            }
-                        }
-                        
-                        // 収入決定
-                        if (isOnMaternity) {
-                            income2 = maternityIncome;
-                        } else if (isReturning) {
-                            income2 = baseIncome * returningRate;
+                    if (person2WorkType === 'homemaker') {
+                        // 専業主婦：年金受給年齢まで収入0
+                        if (age2 >= person2Retire) {
+                            income2 = person2Pension;
                         } else {
-                            income2 = baseIncome;
+                            income2 = 0;
+                        }
+                    } else if (person2WorkType === 'parttime') {
+                        // パート：定年まで固定のパート収入
+                        if (age2 < person2Retire) {
+                            income2 = person2PartIncome * Math.pow(1 + person2Growth, year);
+                        } else {
+                            income2 = person2Pension;
+                        }
+                    } else if (person2WorkType === 'custom') {
+                        // 期間指定：指定期間内のみフルタイム収入
+                        if (age2 >= person2Retire) {
+                            income2 = person2Pension;
+                        } else if (year >= person2WorkStart && year < person2WorkEnd) {
+                            income2 = person2Income * Math.pow(1 + person2Growth, year);
+                        } else {
+                            income2 = 0;
                         }
                     } else {
-                        income2 = person2Pension;
+                        // フルタイム（従来のロジック）
+                        if (age2 < person2Retire) {
+                            const baseIncome = person2Income * Math.pow(1 + person2Growth, year);
+
+                            // 子ども3人分の産休育休をチェック
+                            let isOnMaternity = false;
+                            let maternityIncome = 0;
+                            let isReturning = false;
+                            let returningRate = 1.0;
+
+                            if (child1Enabled && child1Age !== 0) {
+                                if (year >= child1MaternityStart && year < child1MaternityStart + child1MaternityDuration) {
+                                    isOnMaternity = true;
+                                    maternityIncome = child1MaternityAllowance;
+                                } else if (year >= child1MaternityStart + child1MaternityDuration && year < child1MaternityStart + child1MaternityDuration + 3) {
+                                    isReturning = true;
+                                    returningRate = Math.min(returningRate, child1ReturnWorkRate);
+                                }
+                            }
+
+                            if (child2Enabled && child2Age !== 0) {
+                                if (year >= child2MaternityStart && year < child2MaternityStart + child2MaternityDuration) {
+                                    isOnMaternity = true;
+                                    maternityIncome = child2MaternityAllowance;
+                                } else if (year >= child2MaternityStart + child2MaternityDuration && year < child2MaternityStart + child2MaternityDuration + 3) {
+                                    isReturning = true;
+                                    returningRate = Math.min(returningRate, child2ReturnWorkRate);
+                                }
+                            }
+
+                            if (child3Enabled && child3Age !== 0) {
+                                if (year >= child3MaternityStart && year < child3MaternityStart + child3MaternityDuration) {
+                                    isOnMaternity = true;
+                                    maternityIncome = child3MaternityAllowance;
+                                } else if (year >= child3MaternityStart + child3MaternityDuration && year < child3MaternityStart + child3MaternityDuration + 3) {
+                                    isReturning = true;
+                                    returningRate = Math.min(returningRate, child3ReturnWorkRate);
+                                }
+                            }
+
+                            if (isOnMaternity) {
+                                income2 = maternityIncome;
+                            } else if (isReturning) {
+                                income2 = baseIncome * returningRate;
+                            } else {
+                                income2 = baseIncome;
+                            }
+                        } else {
+                            income2 = person2Pension;
+                        }
                     }
                 }
 
@@ -3232,9 +3377,10 @@
                     educationCost += calculateEducation(ageChild3, child3Elementary, child3JuniorHigh, child3HighSchool, child3University);
                 }
 
-                const totalExpenseYear = livingCost + housingCost + carCostInflated + communicationInflated + 
-                                       allowanceInflated + educationCost + lifeInsurance + 
-                                       propertyInsurance + otherLoan + careCostYear;
+                const otherLoanYear = getOtherLoansForYear(year);
+                const totalExpenseYear = livingCost + housingCost + carCostInflated + communicationInflated +
+                                       allowanceInflated + educationCost + lifeInsurance +
+                                       propertyInsurance + otherLoanYear + careCostYear;
 
                 // 積立投資（積立期間内のみ積立）
                 let investmentContribution = 0;
@@ -3568,13 +3714,28 @@
                     }, {
                         label: '総資産（貯蓄+投資）',
                         data: cashflowData.map(d => d.totalAssets),
+                        segment: {
+                            borderColor: function(ctx) {
+                                const yVal = ctx.p1.parsed.y;
+                                return yVal < 0 ? '#dc3545' : '#28a745';
+                            },
+                            backgroundColor: function(ctx) {
+                                const yVal = ctx.p1.parsed.y;
+                                return yVal < 0 ? 'rgba(220, 53, 69, 0.15)' : 'rgba(40, 167, 69, 0.15)';
+                            }
+                        },
                         borderColor: '#28a745',
                         backgroundColor: 'rgba(40, 167, 69, 0.15)',
                         borderWidth: 3,
                         pointRadius: 0,
                         pointHoverRadius: 6,
+                        pointBackgroundColor: function(ctx) {
+                            const val = cashflowData[ctx.dataIndex]?.totalAssets;
+                            return val < 0 ? '#dc3545' : '#28a745';
+                        },
                         yAxisID: 'y1',
-                        tension: 0.4
+                        tension: 0.4,
+                        fill: true
                     }]
                 },
                 options: {
@@ -3588,7 +3749,23 @@
                             labels: {
                                 font: { size: 14, weight: '600' },
                                 padding: 15,
-                                usePointStyle: true
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                                    // 総資産がマイナスになるデータがあれば凡例にも赤を追加
+                                    const hasNegative = cashflowData.some(d => d.totalAssets < 0);
+                                    if (hasNegative) {
+                                        labels.push({
+                                            text: '資金ショート区間',
+                                            fillStyle: 'rgba(220, 53, 69, 0.15)',
+                                            strokeStyle: '#dc3545',
+                                            lineWidth: 3,
+                                            pointStyle: 'line',
+                                            hidden: false
+                                        });
+                                    }
+                                    return labels;
+                                }
                             }
                         },
                         tooltip: {
@@ -3844,7 +4021,8 @@
                         <th>総支出</th>
                         <th>年間収支</th>
                         <th>貯蓄残高</th>
-                        <th>総資産</th>
+                        <th>投資評価額</th>
+                        <th>総資産<br><span style="font-size:10px;font-weight:400;">（貯蓄+投資）</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3859,7 +4037,8 @@
                         <td>${formatMoney(d.totalExpense)}</td>
                         <td style="color: ${d.annualCashflow >= 0 ? '#28a745' : '#dc3545'}">${formatMoney(d.annualCashflow)}</td>
                         <td style="color: ${d.savings >= 0 ? '#28a745' : '#dc3545'}; font-weight: 600">${formatMoney(d.savings)}</td>
-                        <td style="color: ${d.totalAssets >= 0 ? '#28a745' : '#dc3545'}; font-weight: 600">${formatMoney(d.totalAssets)}</td>
+                        <td style="color: #1976d2; font-weight: 600">${formatMoney(d.investment)}</td>
+                        <td style="color: ${d.totalAssets >= 0 ? '#28a745' : '#dc3545'}; font-weight: 700">${formatMoney(d.totalAssets)}</td>
                     </tr>
                 `;
             });
@@ -3884,15 +4063,15 @@
         function downloadCSV() {
             const headers = ['年', '本人年齢', '配偶者年齢', '子1年齢', '子2年齢', '子3年齢',
                            '本人収入', '配偶者収入', '総収入', '生活費', '住居費', '教育費',
-                           '総支出', '年間収支', '貯蓄残高', '総資産'];
-            
+                           '総支出', '年間収支', '貯蓄残高', '投資評価額', '総資産'];
+
             const rows = cashflowData.map((d, i) => [
-                i + 1, d.age1, d.age2 > 0 ? d.age2 : '', 
+                i + 1, d.age1, d.age2 > 0 ? d.age2 : '',
                 d.ageChild1, d.ageChild2, d.ageChild3,
                 Math.round(d.income1), Math.round(d.income2), Math.round(d.totalIncome),
                 Math.round(d.livingCost), Math.round(d.housingCost), Math.round(d.educationCost),
                 Math.round(d.totalExpense), Math.round(d.annualCashflow), Math.round(d.savings),
-                Math.round(d.totalAssets)
+                Math.round(d.investment), Math.round(d.totalAssets)
             ]);
 
             const csv = Papa.unparse({ fields: headers, data: rows });
