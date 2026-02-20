@@ -1944,7 +1944,7 @@
                     </div>
 
                     <!-- 子ども3 -->
-                    <div id="child3UnifiedSection" class="child-section" style="display: none;">
+                    <div id="child3UnifiedSection" class="child-section">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <p class="child-section-label" style="margin: 0;">
                                 子ども3
@@ -2697,11 +2697,6 @@
 
                 for (let i = 1; i <= 3; i++) {
                     toggleChildSection(i);
-                    // 統合セクション全体の表示切替
-                    const section = document.getElementById(`child${i}UnifiedSection`);
-                    if (section) {
-                        section.style.display = (num >= i) ? 'block' : 'none';
-                    }
                 }
             }
         }
@@ -2804,10 +2799,6 @@
 
             for (let i = 1; i <= 3; i++) {
                 toggleChildSection(i);
-                const section = document.getElementById(`child${i}UnifiedSection`);
-                if (section) {
-                    section.style.display = (num >= i) ? 'block' : 'none';
-                }
             }
         }
 
