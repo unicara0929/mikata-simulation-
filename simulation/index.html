@@ -1114,7 +1114,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo"><span style="color: #ff5757;">MI</span>KATA</div>
+            <div class="logo"><img src="MIKATA_10.png" alt="MIKATA" style="height: 50px; filter: brightness(0) invert(1);"></div>
             <h1>住宅購入ライフプランシミュレーター</h1>
             <p>ご家族の未来を数字で「見える化」── 60年間の家計を堅実にシミュレーション</p>
             <button class="share-btn" onclick="openShareModal()">🔗 設定を共有</button>
@@ -1145,7 +1145,6 @@
             <div class="preset-section">
                 <div class="preset-title">💡 よくあるケースから選んで簡単スタート</div>
                 <div class="preset-buttons">
-                    <button class="preset-btn" onclick="loadPreset('aichi')" style="border-color: #c49b5a; color: #c49b5a; font-weight: 700;">⭐ 伊藤家モデル</button>
                     <button class="preset-btn" onclick="loadPreset('average')">🏠 平均的な家庭</button>
                     <button class="preset-btn" onclick="loadPreset('dualIncome')">👔 共働き世帯</button>
                     <button class="preset-btn" onclick="loadPreset('highIncome')">💼 高収入世帯</button>
@@ -2748,11 +2747,6 @@
         // プリセット読み込み
         function loadPreset(type) {
             const presets = {
-                aichi: {
-                    person1Age: 35, person2Age: 33, totalIncome: 1050, numChildren: 2,
-                    propertyPrice: 5000, downPayment: 500, person1Income: 750, person2Income: 300,
-                    currentRent: 11.5, carCost: 50, basicLiving: 25
-                },
                 average: {
                     person1Age: 35, person2Age: 33, totalIncome: 800, numChildren: 2,
                     propertyPrice: 5000, downPayment: 500, person1Income: 500, person2Income: 300
@@ -2788,22 +2782,6 @@
             document.getElementById('child2Age').value = num >= 2 ? 3 : 0;
             document.getElementById('child3Age').value = num >= 3 ? 1 : 0;
 
-            // 伊藤家モデル特有の設定
-            if (type === 'aichi') {
-                document.getElementById('child1Age').value = 5;
-                document.getElementById('child2Age').value = 2;
-                // 配偶者：時短勤務
-                document.getElementById('person2WorkType').value = 'parttime';
-                document.getElementById('person2PartIncome').value = 300;
-                togglePerson2WorkSettings();
-                // その他ローン：アルファードのカーローン
-                const loanItems = document.querySelectorAll('.other-loan-item');
-                if (loanItems.length > 0) {
-                    loanItems[0].querySelector('.otherLoanName').value = 'アルファード ローン';
-                    loanItems[0].querySelector('.otherLoanAmount').value = 5;
-                    loanItems[0].querySelector('.otherLoanYears').value = 5;
-                }
-            }
         }
 
         // 詳細設定トグル
