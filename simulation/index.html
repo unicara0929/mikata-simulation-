@@ -3642,17 +3642,44 @@
         }
 
         function displaySummary(totalIncome, totalExpense, minSavings, minSavingsYear, finalSavings, annualLoan, loanAmount, loanStartYear, person1Age, loanTerm, child1Age, child2Age, child3Age) {
+            // 投資状況を確認
+            const hasInvestment = cashflowData.some(d => d.investment > 0);
+            const finalInvestment = cashflowData[59]?.investment || 0;
+            const finalSavingsOnly = cashflowData[59]?.savings || 0;
+            const investmentRatio = finalSavings > 0 ? (finalInvestment / finalSavings * 100) : 0;
+
             // アラート
             let alertHTML = '';
             let alertClass = 'alert-box';
             if (minSavings < 0) {
                 alertClass += '';
-                alertHTML = `<p>⚠️ <strong>警告：</strong>${minSavingsYear + 1}年目に貯蓄がマイナス（${formatMoney(minSavings)}）になります。収支の見直しが必要です。</p>`;
+                alertHTML = `<p>⚠️ <strong>警告：</strong>${minSavingsYear + 1}年目に総資産がマイナス（${formatMoney(minSavings)}）になる見込みです。</p>`;
+                alertHTML += `<p style="margin-top:8px; font-size:13px; color:#666;">💡 支出の見直しや、収入アップの可能性を検討してみましょう。少額からの積立投資で長期的な資産形成を始めることも、リスク軽減の一つの方法です。</p>`;
             } else if (finalSavings < 1000) {
-                alertHTML = `<p>⚠️ <strong>注意：</strong>最終的な貯蓄残高が${formatMoney(finalSavings)}です。老後資金を増やす工夫が必要かもしれません。</p>`;
+                alertHTML = `<p>⚠️ <strong>注意：</strong>60年後の総資産が${formatMoney(finalSavings)}の見込みです。</p>`;
+                if (!hasInvestment) {
+                    alertHTML += `<p style="margin-top:8px; font-size:13px; color:#666;">💡 現在の計画では投資による運用が設定されていません。住宅購入と並行して、少額からの積立投資を活用することで、老後資金の準備をより効率的に進められる可能性があります。</p>`;
+                } else if (investmentRatio < 30) {
+                    alertHTML += `<p style="margin-top:8px; font-size:13px; color:#666;">💡 投資による資産形成が進んでいますが、積立額や運用期間を見直すことで、さらにゆとりある老後資金の準備ができるかもしれません。</p>`;
+                } else {
+                    alertHTML += `<p style="margin-top:8px; font-size:13px; color:#666;">💡 積立投資を活用されていますね。積立期間の延長や、支出の見直しで積立額を増やすことも検討してみてください。</p>`;
+                }
+            } else if (finalSavings < 3000) {
+                alertClass += ' success';
+                alertHTML = `<p>✅ <strong>概ね良好：</strong>計画的な家計運営ができています。</p>`;
+                if (!hasInvestment) {
+                    alertHTML += `<p style="margin-top:8px; font-size:13px; color:#555;">💡 さらにゆとりある将来に向けて、少額からの積立投資で資産運用を始めてみるのも一つの選択肢です。時間を味方につけた長期運用は、住宅購入後の資産形成に有効です。</p>`;
+                } else {
+                    alertHTML += `<p style="margin-top:8px; font-size:13px; color:#555;">💡 投資を活用した資産形成が進んでいます。このペースを維持しつつ、ライフステージの変化に合わせて見直していきましょう。</p>`;
+                }
             } else {
                 alertClass += ' success';
-                alertHTML = `<p>✅ <strong>良好：</strong>計画的な家計運営ができています！この調子で継続しましょう。</p>`;
+                alertHTML = `<p>✅ <strong>良好：</strong>安定した家計運営と資産形成ができています！</p>`;
+                if (hasInvestment) {
+                    alertHTML += `<p style="margin-top:8px; font-size:13px; color:#555;">💡 投資評価額 ${formatMoney(finalInvestment)} を含めた総資産 ${formatMoney(finalSavings)} の見込みです。住宅購入と資産形成のバランスが取れた計画です。</p>`;
+                } else {
+                    alertHTML += `<p style="margin-top:8px; font-size:13px; color:#555;">💡 貯蓄のみで ${formatMoney(finalSavings)} の資産形成が見込めます。ここに投資による運用を加えることで、さらに効率的な資産形成が期待できます。</p>`;
+                }
             }
             document.getElementById('alertBox').className = alertClass;
             document.getElementById('alertBox').innerHTML = alertHTML;
@@ -4226,25 +4253,25 @@
                         <th class="year-column" rowspan="2">年</th>
                         <th rowspan="2">本人<br>年齢</th>
                         <th rowspan="2">配偶者<br>年齢</th>
-                        <th colspan="4" style="background: rgba(255,87,87,0.1); border-bottom: 2px solid #ff5757;">収入内訳</th>
-                        <th rowspan="2" style="background: rgba(255,87,87,0.15);">総収入</th>
-                        <th colspan="5" style="background: rgba(44,95,138,0.1); border-bottom: 2px solid #2c5f8a;">支出内訳</th>
-                        <th rowspan="2" style="background: rgba(44,95,138,0.15);">総支出</th>
+                        <th colspan="4" style="background: #e74c3c; border-bottom: 2px solid #ff5757;">収入内訳</th>
+                        <th rowspan="2" style="background: #a93226;">総収入</th>
+                        <th colspan="5" style="background: #2c5f8a; border-bottom: 2px solid #3498db;">支出内訳</th>
+                        <th rowspan="2" style="background: #1a3a5c;">総支出</th>
                         <th rowspan="2">年間<br>収支</th>
                         <th rowspan="2">貯蓄<br>残高</th>
                         <th rowspan="2">投資<br>評価額</th>
                         <th rowspan="2">総資産</th>
                     </tr>
                     <tr>
-                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">本人</th>
-                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">配偶者</th>
-                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">退職金<br>手当等</th>
-                        <th style="background: rgba(255,87,87,0.05); font-size:11px;">児童<br>手当</th>
-                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">生活費</th>
-                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">住居費</th>
-                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">教育費</th>
-                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">保険<br>車等</th>
-                        <th style="background: rgba(44,95,138,0.05); font-size:11px;">積立<br>投資等</th>
+                        <th style="background: #c0392b; font-size:11px;">本人</th>
+                        <th style="background: #c0392b; font-size:11px;">配偶者</th>
+                        <th style="background: #c0392b; font-size:11px;">退職金<br>手当等</th>
+                        <th style="background: #c0392b; font-size:11px;">児童<br>手当</th>
+                        <th style="background: #2c5f8a; font-size:11px;">生活費</th>
+                        <th style="background: #2c5f8a; font-size:11px;">住居費</th>
+                        <th style="background: #2c5f8a; font-size:11px;">教育費</th>
+                        <th style="background: #2c5f8a; font-size:11px;">保険<br>車等</th>
+                        <th style="background: #2c5f8a; font-size:11px;">積立<br>投資等</th>
                     </tr>
                 </thead>
                 <tbody>
