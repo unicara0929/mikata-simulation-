@@ -4572,40 +4572,84 @@
             let totalInterest = 0;
             let currentRate = initialRate;
             const maxRate = 0.03; // 上限3%（現実的な範囲）
+            let unpaidInterest = 0; // 未払い利息
+
+            // 初回の月々返済額を計算
+            const totalMonths = term * 12;
+            let monthlyPayment;
+            if (initialRate === 0) {
+                monthlyPayment = principal / totalMonths;
+            } else {
+                const mr = initialRate / 12;
+                monthlyPayment = principal * (mr * Math.pow(1 + mr, totalMonths)) /
+                                (Math.pow(1 + mr, totalMonths) - 1);
+            }
+
+            let monthCounter = 0; // 通算月数カウンタ
 
             for (let year = 1; year <= term; year++) {
-                const monthlyRate = currentRate / 12;
-                const remainingMonths = (term - year + 1) * 12;
-                
-                let monthlyPayment;
-                if (currentRate === 0) {
-                    monthlyPayment = balance / remainingMonths;
-                } else {
-                    monthlyPayment = balance * (monthlyRate * Math.pow(1 + monthlyRate, remainingMonths)) / 
-                                    (Math.pow(1 + monthlyRate, remainingMonths) - 1);
+                // 5年ルール：5年ごと（60ヶ月ごと）に返済額を見直し
+                if (year > 1 && (year - 1) % 5 === 0) {
+                    const remainingMonths = (term - year + 1) * 12;
+                    const effectiveBalance = balance + unpaidInterest;
+                    let newPayment;
+                    if (currentRate === 0) {
+                        newPayment = effectiveBalance / remainingMonths;
+                    } else {
+                        const mr = currentRate / 12;
+                        newPayment = effectiveBalance * (mr * Math.pow(1 + mr, remainingMonths)) /
+                                    (Math.pow(1 + mr, remainingMonths) - 1);
+                    }
+                    // 125%ルール：新返済額は旧返済額の125%が上限
+                    const maxPayment = monthlyPayment * 1.25;
+                    monthlyPayment = Math.min(newPayment, maxPayment);
                 }
 
+                const monthlyRate = currentRate / 12;
                 let yearPrincipal = 0;
                 let yearInterest = 0;
+                let yearUnpaidInterest = 0;
 
                 for (let month = 1; month <= 12; month++) {
-                    const interest = balance * monthlyRate;
-                    const principalPmt = monthlyPayment - interest;
-                    balance -= principalPmt;
+                    monthCounter++;
+                    // 利息計算（未払い利息にも利息がかかる）
+                    const interest = (balance + unpaidInterest) * monthlyRate;
+                    const availableForPrincipal = monthlyPayment - interest;
+
+                    if (availableForPrincipal > 0) {
+                        // 通常：利息を払った残りで元金返済
+                        // まず未払い利息を優先返済
+                        if (unpaidInterest > 0) {
+                            if (availableForPrincipal >= unpaidInterest) {
+                                const remainder = availableForPrincipal - unpaidInterest;
+                                unpaidInterest = 0;
+                                balance -= remainder;
+                            } else {
+                                unpaidInterest -= availableForPrincipal;
+                            }
+                        } else {
+                            balance -= availableForPrincipal;
+                        }
+                        yearInterest += interest;
+                    } else {
+                        // 未払い利息発生：返済額で利息すら払えない
+                        yearInterest += monthlyPayment; // 返済額は全額利息充当
+                        unpaidInterest += (interest - monthlyPayment);
+                        yearUnpaidInterest += (interest - monthlyPayment);
+                    }
+
                     if (balance < 0) balance = 0;
-                    
-                    totalInterest += interest;
-                    yearPrincipal += principalPmt;
-                    yearInterest += interest;
+                    totalInterest += Math.min(interest, monthlyPayment);
                 }
 
                 schedule.push({
                     year: year,
                     payment: monthlyPayment * 12,
-                    principal: yearPrincipal,
+                    principal: yearPrincipal > 0 ? yearPrincipal : Math.max(0, monthlyPayment * 12 - yearInterest),
                     interest: yearInterest,
                     balance: balance,
-                    rate: currentRate * 100
+                    rate: currentRate * 100,
+                    unpaidInterest: unpaidInterest
                 });
 
                 // 金利を上昇させる（上限あり）
@@ -4613,12 +4657,16 @@
                 if (currentRate > maxRate) currentRate = maxRate;
             }
 
+            // 最終残高がある場合（5年ルールで元金が残った場合）
+            const finalBalance = balance + unpaidInterest;
+
             return {
                 schedule: schedule,
-                totalPayment: principal + totalInterest,
-                totalInterest: totalInterest,
+                totalPayment: principal + totalInterest + finalBalance,
+                totalInterest: totalInterest + finalBalance - (finalBalance > 0 ? balance : 0),
                 monthlyPayment: schedule[0].payment / 12,
-                finalRate: currentRate * 100
+                finalRate: currentRate * 100,
+                finalBalance: finalBalance
             };
         }
 
@@ -4693,6 +4741,12 @@
                         <p style="color: #666; font-size: 14px;">
                             ※ ${scenarioNames[scenario]}を想定したシミュレーションです。実際の金利変動は経済状況により異なります。
                         </p>
+                        <p style="color: #666; font-size: 13px; margin-top: 8px;">
+                            ※ 変動金利は5年ルール（返済額見直しは5年ごと）・125%ルール（見直し時の上限は旧返済額の1.25倍）を適用しています。
+                        </p>
+                        ${variable.finalBalance > 0 ? `<p style="color: #dc3545; font-size: 14px; font-weight: 600; margin-top: 8px;">
+                            ⚠️ 5年ルール・125%ルールにより、ローン期間終了時に未返済残高 ${formatMoney(variable.finalBalance)} が発生する見込みです。実際には最終回に一括返済が必要になります。
+                        </p>` : ''}
                     </div>
                 </div>
                 <div class="chart-container">
