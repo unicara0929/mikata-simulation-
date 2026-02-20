@@ -34,7 +34,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -93,123 +93,6 @@
 
         .content {
             padding: 40px;
-            display: grid;
-            grid-template-columns: 1fr 260px;
-            gap: 24px;
-        }
-
-        .main-column {
-            min-width: 0;
-            order: 1;
-        }
-
-        .sidebar {
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-            align-self: start;
-            order: 2;
-        }
-
-        .sidebar-inner {
-            background: #f8f9fa;
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .sidebar-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #ff5757 0%, #ff8a80 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 87, 87, 0.3);
-            margin-bottom: 20px;
-        }
-
-        .sidebar-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 87, 87, 0.4);
-        }
-
-        .sidebar-badge {
-            display: none;
-            text-align: center;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-
-        .sidebar-badge.show {
-            display: block;
-        }
-
-        .sidebar-badge.risk-high {
-            background: linear-gradient(135deg, #fff5f5, #ffe0e0);
-            border: 2px solid #ff5757;
-        }
-
-        .sidebar-badge.risk-medium {
-            background: linear-gradient(135deg, #fffbf0, #fff3d0);
-            border: 2px solid #ffc107;
-        }
-
-        .sidebar-badge.risk-low {
-            background: linear-gradient(135deg, #f0fff4, #d4edda);
-            border: 2px solid #28a745;
-        }
-
-        .sidebar-badge-icon {
-            font-size: 32px;
-            margin-bottom: 6px;
-        }
-
-        .sidebar-badge-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .sidebar-badge-desc {
-            font-size: 12px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .sidebar-stats {
-            display: none;
-        }
-
-        .sidebar-stats.show {
-            display: block;
-        }
-
-        .sidebar-stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 13px;
-        }
-
-        .sidebar-stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .sidebar-stat-label {
-            color: #666;
-        }
-
-        .sidebar-stat-value {
-            font-weight: 700;
-            color: #1a3a5c;
         }
 
         /* プリセットボタン */
@@ -389,7 +272,6 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            display: none;
         }
 
         .calculate-btn-fixed .calculate-btn {
@@ -789,15 +671,6 @@
         @media (max-width: 768px) {
             .content {
                 padding: 20px;
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                display: none;
-            }
-
-            .calculate-btn-fixed {
-                display: block !important;
             }
 
             .input-row {
@@ -1250,39 +1123,6 @@
         </div>
 
         <div class="content">
-            <!-- サイドバー -->
-            <div class="sidebar">
-                <div class="sidebar-inner">
-                    <button class="sidebar-btn" onclick="calculate()">💡 シミュレーション実行</button>
-
-                    <div class="sidebar-badge" id="sidebarBadge">
-                        <div class="sidebar-badge-icon" id="sidebarBadgeIcon"></div>
-                        <div class="sidebar-badge-title" id="sidebarBadgeTitle"></div>
-                        <div class="sidebar-badge-desc" id="sidebarBadgeDesc"></div>
-                    </div>
-
-                    <div class="sidebar-stats" id="sidebarStats">
-                        <div class="sidebar-stat-item">
-                            <span class="sidebar-stat-label">最終貯蓄残高</span>
-                            <span class="sidebar-stat-value" id="sidebarFinalSavings">-</span>
-                        </div>
-                        <div class="sidebar-stat-item">
-                            <span class="sidebar-stat-label">最低残高</span>
-                            <span class="sidebar-stat-value" id="sidebarMinSavings">-</span>
-                        </div>
-                        <div class="sidebar-stat-item">
-                            <span class="sidebar-stat-label">返済負担率</span>
-                            <span class="sidebar-stat-value" id="sidebarDebtRatio">-</span>
-                        </div>
-                        <div class="sidebar-stat-item">
-                            <span class="sidebar-stat-label">平均年間収支</span>
-                            <span class="sidebar-stat-value" id="sidebarAvgCashflow">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- メインカラム -->
-            <div class="main-column">
             <!-- リスクインジケーター -->
             <div class="risk-indicator" id="riskIndicator">
                 <div class="risk-content">
@@ -2791,8 +2631,7 @@
                     <div id="comparisonContent"></div>
                 </div>
             </div>
-        </div><!-- /main-column -->
-        </div><!-- /content -->
+        </div>
     </div>
 
     <!-- 共有モーダル -->
@@ -3744,7 +3583,6 @@
             
             // リスク信号機とタイムラインを表示
             updateRiskIndicator(minSavings, finalSavings);
-            updateSidebarStats(finalSavings, minSavings, debtBurdenRatio, averageCashflow);
             updateTimeline(person1Age, loanStartYear, loanTerm, child1Age, child2Age, child3Age);
         }
 
@@ -3778,51 +3616,6 @@
             }
 
             indicator.style.display = 'block';
-
-            // サイドバーのバッジも更新
-            updateSidebarBadge(minSavings, finalSavings);
-        }
-
-        function updateSidebarBadge(minSavings, finalSavings) {
-            const badge = document.getElementById('sidebarBadge');
-            const badgeIcon = document.getElementById('sidebarBadgeIcon');
-            const badgeTitle = document.getElementById('sidebarBadgeTitle');
-            const badgeDesc = document.getElementById('sidebarBadgeDesc');
-
-            badge.className = 'sidebar-badge show';
-
-            if (minSavings < 0) {
-                badge.classList.add('risk-high');
-                badgeIcon.textContent = '⚠️';
-                badgeTitle.textContent = 'リスク高';
-                badgeTitle.style.color = '#ff5757';
-                badgeDesc.textContent = '貯蓄がマイナスになる可能性あり';
-            } else if (finalSavings < 1000) {
-                badge.classList.add('risk-medium');
-                badgeIcon.textContent = '⚡';
-                badgeTitle.textContent = '要注意';
-                badgeTitle.style.color = '#ffc107';
-                badgeDesc.textContent = '老後資金が不足気味です';
-            } else {
-                badge.classList.add('risk-low');
-                badgeIcon.textContent = '✅';
-                badgeTitle.textContent = '良好';
-                badgeTitle.style.color = '#28a745';
-                badgeDesc.textContent = '安定した家計運営ができています';
-            }
-        }
-
-        function updateSidebarStats(finalSavings, minSavings, debtRatio, avgCashflow) {
-            const stats = document.getElementById('sidebarStats');
-            stats.className = 'sidebar-stats show';
-
-            document.getElementById('sidebarFinalSavings').textContent = formatMoney(finalSavings);
-            document.getElementById('sidebarMinSavings').textContent = formatMoney(minSavings);
-            document.getElementById('sidebarDebtRatio').textContent = debtRatio.toFixed(1) + '%';
-
-            const avgEl = document.getElementById('sidebarAvgCashflow');
-            avgEl.textContent = formatMoney(avgCashflow);
-            avgEl.style.color = avgCashflow >= 0 ? '#28a745' : '#ff5757';
         }
 
         function updateTimeline(startAge, loanStart, loanTerm, child1, child2, child3) {
