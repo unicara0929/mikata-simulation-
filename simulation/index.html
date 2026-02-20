@@ -48,6 +48,17 @@
             padding: 40px 30px;
             text-align: center;
             position: relative;
+            border-top: 5px solid #ff5757;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff5757 0%, #ff8a80 50%, #ff5757 100%);
         }
 
         .share-btn {
@@ -66,8 +77,9 @@
         }
 
         .share-btn:hover {
-            background: white;
-            color: #1a3a5c;
+            background: #ff5757;
+            border-color: #ff5757;
+            color: white;
             transform: translateY(-2px);
         }
 
@@ -333,6 +345,7 @@
             user-select: none;
             padding: 20px 25px;
             transition: background 0.2s;
+            border-left: 4px solid #ff5757;
         }
 
         .accordion-header:hover {
@@ -536,12 +549,12 @@
         }
 
         .tab.active {
-            color: #1a3a5c;
-            border-bottom-color: #1a3a5c;
+            color: #ff5757;
+            border-bottom-color: #ff5757;
         }
 
         .tab:hover {
-            color: #1a3a5c;
+            color: #ff5757;
         }
 
         .tab-content {
@@ -567,7 +580,7 @@
             color: #222;
             margin-bottom: 25px;
             padding-bottom: 15px;
-            border-bottom: 3px solid #1a3a5c;
+            border-bottom: 3px solid #ff5757;
             text-align: left;
         }
 
@@ -1116,7 +1129,7 @@
         <div class="header">
             <div class="logo"><img src="MIKATA_10.png" alt="MIKATA" style="height: 50px; filter: brightness(0) invert(1);"></div>
             <h1>住宅購入ライフプランシミュレーター</h1>
-            <p>ご家族の未来を数字で「見える化」── 60年間の家計を堅実にシミュレーション</p>
+            <p>ご家族の未来を数字で<span style="color: #ff5757; font-weight: 700;">「見える化」</span>── 60年間の家計を堅実にシミュレーション</p>
             <button class="share-btn" onclick="openShareModal()">🔗 設定を共有</button>
         </div>
 
