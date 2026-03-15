@@ -2527,46 +2527,20 @@
                         </p>
                     </div>
 
-                    <!-- 積立投資 -->
+                    <!-- 積立投資（複数項目対応） -->
                     <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
                         <p style="font-size: 14px; font-weight: 600; margin: 0 0 10px 0;">📊 積立投資（NISA・iDeCoなど）</p>
-                        <div class="input-row">
-                            <div class="input-group">
-                                <div class="input-label">
-                                    毎月の積立額
-                                    <span class="help-icon" data-tip="毎月定額で積立投資する金額">?</span>
-                                </div>
-                                <div class="input-wrapper">
-                                    <input type="number" id="monthlyInvestment" value="3" step="0.5">
-                                    <span class="unit-label">万円</span>
-                                </div>
-                            </div>
-                            <div class="input-group">
-                                <div class="input-label">
-                                    運用利回り（年間）
-                                    <span class="help-icon" data-tip="積立投資の期待リターン">?</span>
-                                </div>
-                                <div class="input-wrapper">
-                                    <input type="number" id="monthlyReturn" value="3.0" step="0.5" min="0" max="15">
-                                    <span class="unit-label">%</span>
-                                </div>
-                            </div>
+                        <div id="monthlyInvestmentItems">
+                            <!-- 積立投資項目がここに動的に追加される -->
                         </div>
-                        <div class="input-row">
-                            <div class="input-group">
-                                <div class="input-label">
-                                    積立期間
-                                    <span class="help-icon" data-tip="何年間積立を続けるか">?</span>
-                                </div>
-                                <div class="input-wrapper">
-                                    <input type="number" id="investmentYears" value="30" min="0" max="60">
-                                    <span class="unit-label">年</span>
-                                </div>
-                            </div>
-                            <div class="input-group"></div>
-                        </div>
+                        <button type="button" onclick="addMonthlyInvestmentItem()" style="
+                            width: 100%; padding: 10px; margin-top: 8px;
+                            background: #4caf50; color: white; border: none; border-radius: 6px;
+                            font-size: 14px; font-weight: 600; cursor: pointer;
+                        ">＋ 積立投資を追加</button>
                         <p style="font-size: 12px; color: #666; margin: 8px 0 0 0;">
-                            ℹ️ 積立期間中は利回りが適用されます。積立期間終了後は利回り0%の貯蓄として保持されます。
+                            ℹ️ 積立期間中は利回りが適用されます。積立期間終了後は利回り0%の貯蓄として保持されます。<br>
+                            ℹ️ 過去から運用中の投資は「経過年数」と「現在の評価額」を入力してください。
                         </p>
                     </div>
                     
@@ -2694,6 +2668,110 @@
     <script>
         let charts = {};
         let cashflowData = [];
+        let monthlyInvestmentCounter = 0;
+
+        // 積立投資項目の追加
+        function addMonthlyInvestmentItem(data) {
+            const id = monthlyInvestmentCounter++;
+            const container = document.getElementById('monthlyInvestmentItems');
+            const item = document.createElement('div');
+            item.className = 'monthly-inv-item';
+            item.id = 'monthlyInvItem_' + id;
+            item.style.cssText = 'background: #c8e6c9; padding: 10px; border-radius: 6px; margin-bottom: 8px; position: relative;';
+
+            const name = (data && data.name) || '積立投資 ' + (id + 1);
+            const amount = (data && data.amount) || 3;
+            const ret = (data && data.returnRate) || 3.0;
+            const years = (data && data.years) || 30;
+            const elapsed = (data && data.elapsed) || 0;
+            const currentValue = (data && data.currentValue) || 0;
+
+            item.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <input type="text" class="inv-name" value="${name}" placeholder="名前（例: つみたてNISA）" style="
+                        flex: 1; padding: 4px 8px; border: 1px solid #aaa; border-radius: 4px;
+                        font-size: 13px; font-weight: 600; background: white;
+                    ">
+                    <button type="button" onclick="removeMonthlyInvestmentItem(${id})" style="
+                        margin-left: 8px; background: #ef5350; color: white; border: none;
+                        border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px;
+                    ">✕ 削除</button>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <div class="input-label">毎月の積立額</div>
+                        <div class="input-wrapper">
+                            <input type="number" class="inv-amount" value="${amount}" step="0.5" min="0">
+                            <span class="unit-label">万円</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-label">運用利回り（年間）</div>
+                        <div class="input-wrapper">
+                            <input type="number" class="inv-return" value="${ret}" step="0.5" min="0" max="15">
+                            <span class="unit-label">%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <div class="input-label">
+                            積立期間（今後）
+                            <span class="help-icon" data-tip="今後何年間積立を続けるか">?</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="number" class="inv-years" value="${years}" min="0" max="60">
+                            <span class="unit-label">年</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-label">
+                            経過年数（過去分）
+                            <span class="help-icon" data-tip="すでに積立を始めている場合、何年経過しているか（0なら新規）">?</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="number" class="inv-elapsed" value="${elapsed}" min="0" max="60">
+                            <span class="unit-label">年</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <div class="input-label">
+                            現在の評価額
+                            <span class="help-icon" data-tip="すでに投資している場合の現在の評価額（0なら新規開始）">?</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="number" class="inv-current-value" value="${currentValue}" step="10" min="0">
+                            <span class="unit-label">万円</span>
+                        </div>
+                    </div>
+                    <div class="input-group"></div>
+                </div>
+            `;
+            container.appendChild(item);
+        }
+
+        function removeMonthlyInvestmentItem(id) {
+            const item = document.getElementById('monthlyInvItem_' + id);
+            if (item) item.remove();
+        }
+
+        function getMonthlyInvestmentItems() {
+            const items = document.querySelectorAll('.monthly-inv-item');
+            const result = [];
+            items.forEach(item => {
+                result.push({
+                    name: item.querySelector('.inv-name').value,
+                    amount: parseFloat(item.querySelector('.inv-amount').value) || 0,
+                    returnRate: (parseFloat(item.querySelector('.inv-return').value) || 0) / 100,
+                    years: parseInt(item.querySelector('.inv-years').value) || 0,
+                    elapsed: parseInt(item.querySelector('.inv-elapsed').value) || 0,
+                    currentValue: parseFloat(item.querySelector('.inv-current-value').value) || 0,
+                });
+            });
+            return result;
+        }
 
         // スライダー更新
         function updateSlider(id) {
@@ -3326,11 +3404,8 @@
             const lumpSumReturn = parseFloat(document.getElementById('lumpSumReturn').value) / 100;
             const lumpSumYears = parseInt(document.getElementById('lumpSumYears').value) || 30;
             
-            // 積立投資
-            const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment').value);
-            const monthlyReturn = parseFloat(document.getElementById('monthlyReturn').value) / 100;
-            const investmentYears = parseInt(document.getElementById('investmentYears').value); // 積立期間
-            const monthlyInvYears = investmentYears; // 運用期間 = 積立期間（積立終了後は利回り0%）
+            // 積立投資（複数項目）
+            const monthlyInvestmentItems = getMonthlyInvestmentItems();
 
             // ヘルパー関数
             const getValueOrZero = (id) => {
@@ -3459,7 +3534,8 @@
             cashflowData = [];
             let savings = savingsStart; // 貯蓄（普通預金・運用なし）
             let lumpSumInv = lumpSumInvestment; // 一括投資（別々の利回り）
-            let monthlyInv = 0; // 積立投資（別々の利回り）
+            // 積立投資（複数項目、各項目の現在評価額を初期値として設定）
+            let monthlyInvValues = monthlyInvestmentItems.map(item => item.currentValue || 0);
             let minSavings = savingsStart;
             let minSavingsYear = 0;
             let totalIncome = 0;
@@ -3645,27 +3721,32 @@
                                        allowanceInflated + educationCost + lifeInsurance +
                                        propertyInsurance + otherLoanYear + careCostYear;
 
-                // 積立投資（積立期間内のみ積立）
+                // 積立投資（複数項目対応）
                 let investmentContribution = 0;
-                if (year < investmentYears) {
-                    investmentContribution = monthlyInvestment * 12;
-                    monthlyInv += investmentContribution; // 積立投資に追加
+                for (let i = 0; i < monthlyInvestmentItems.length; i++) {
+                    const item = monthlyInvestmentItems[i];
+                    // 残りの積立期間（今後の年数）内のみ積立
+                    if (year < item.years) {
+                        const contribution = item.amount * 12;
+                        investmentContribution += contribution;
+                        monthlyInvValues[i] += contribution;
+                    }
+                    // 運用利回り適用（今後の積立期間中のみ）
+                    if (year < item.years) {
+                        monthlyInvValues[i] = monthlyInvValues[i] * (1 + item.returnRate);
+                    }
+                    // 運用期間終了後は利回り0%で保持（何もしない）
                 }
-                
+
                 // 一括投資の運用益（運用期間内のみ利回り適用）
                 if (year < lumpSumYears) {
                     lumpSumInv = lumpSumInv * (1 + lumpSumReturn);
                 }
                 // 運用期間終了後は利回り0%で保持（何もしない）
-                
-                // 積立投資の運用益（運用期間内のみ利回り適用）
-                if (year < monthlyInvYears) {
-                    monthlyInv = monthlyInv * (1 + monthlyReturn);
-                }
-                // 運用期間終了後は利回り0%で保持（何もしない）
-                
+
                 // 投資合計
-                const investment = lumpSumInv + monthlyInv;
+                const monthlyInvTotal = monthlyInvValues.reduce((sum, v) => sum + v, 0);
+                const investment = lumpSumInv + monthlyInvTotal;
 
                 // 火災保険（購入時と5年ごと）
                 let fireInsuranceCost = 0;
@@ -4845,6 +4926,9 @@
                 toggleChildSection(i);
             }
 
+            // デフォルトの積立投資項目を1つ追加
+            addMonthlyInvestmentItem();
+
             // URLパラメータから設定を読み込み
             loadFromURL();
         });
@@ -4869,6 +4953,12 @@
                 params.set('variable', document.getElementById('variableRate').value);
             }
             
+            // 積立投資項目
+            const invItems = getMonthlyInvestmentItems();
+            if (invItems.length > 0) {
+                params.set('invItems', JSON.stringify(invItems));
+            }
+
             const url = window.location.origin + window.location.pathname + '?' + params.toString();
             document.getElementById('shareURL').value = url;
             document.getElementById('shareModal').style.display = 'block';
@@ -4946,6 +5036,25 @@
                 }
             }
             
+            // 積立投資項目の復元
+            if (params.has('invItems')) {
+                try {
+                    const items = JSON.parse(params.get('invItems'));
+                    document.getElementById('monthlyInvestmentItems').innerHTML = '';
+                    monthlyInvestmentCounter = 0;
+                    items.forEach(item => {
+                        addMonthlyInvestmentItem({
+                            name: item.name,
+                            amount: item.amount,
+                            returnRate: item.returnRate * 100,
+                            years: item.years,
+                            elapsed: item.elapsed,
+                            currentValue: item.currentValue
+                        });
+                    });
+                } catch(e) { /* ignore parse errors */ }
+            }
+
             // URLパラメータがある場合は自動計算
             if (params.has('p1age')) {
                 setTimeout(() => {
